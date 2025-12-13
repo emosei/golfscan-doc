@@ -668,6 +668,7 @@
         let currentFilter = 'original';
         let lastTime = Date.now();
         let frameCount = 0;
+        let cap; // Add global
 
         function onOpenCvReady() {
             console.log('OpenCV.js Ready');
@@ -718,6 +719,9 @@
                 stream = null;
                 streaming = false;
             }
+            if (srcMat) { srcMat.delete(); srcMat = null; }
+            if (dstMat) { dstMat.delete(); dstMat = null; }
+            cap = null; 
         }
 
         function processVideo() {
@@ -729,27 +733,33 @@
                 return;
             }
 
-            // Detect Resolution Change (e.g. mobile rotation or initial load)
-            if (streaming && (video.videoWidth !== srcMat.cols || video.videoHeight !== srcMat.rows)) {
-                // Re-initialize mats if video dimensions changed
+            // Initialization or Resize
+            if (!streaming || video.videoWidth !== srcMat.cols || video.videoHeight !== srcMat.rows) {
                 try {
-                    srcMat.delete();
-                    dstMat.delete();
-                    srcMat = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
-                    dstMat = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                } catch(e) { console.error("Resize Error:", e); }
-            }
+                    // Fix: Set video element attributes to match intrinsic size for OpenCV
+                    video.width = video.videoWidth;
+                    video.height = video.videoHeight;
 
-            if (!streaming) {
-                try {
+                    // Initialize/Reinitialize Matrices
+                    if (srcMat) srcMat.delete();
+                    if (dstMat) dstMat.delete();
                     srcMat = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
                     dstMat = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+                    
+                    // Update Output Canvas
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
+
+                    // Reinitialize VideoCapture
+                    cap = new cv.VideoCapture(video);
+                    
                     streaming = true;
-                } catch(e) { console.error("Init Error:", e); }
+                } catch(e) { 
+                    console.error("Init/Resize Error:", e); 
+                    // Retry next frame if failed
+                    requestAnimationFrame(processVideo);
+                    return;
+                }
             }
 
             try {
@@ -764,8 +774,7 @@
                 }
                 const t0 = performance.now();
 
-                // Capture Frame
-                let cap = new cv.VideoCapture(video);
+                // Capture Frame using persistent cap
                 cap.read(srcMat);
 
                 // Apply Filter
