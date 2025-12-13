@@ -544,6 +544,9 @@
                             「STEP 1: 画像取得・前処理」における技術課題（前処理ロジック）を検証するためのプロトタイプです。
                             <br><span class="text-xs text-slate-500">※Start Demoボタンを押すとブラウザのカメラ権限を要求します。</span>
                         </p>
+                        <p class="text-xs text-amber-400 mt-2 font-bold bg-amber-900/30 p-2 rounded border border-amber-500/30">
+                            ご注意: このプレビュー画面上ではカメラが起動しない場合があります。その際は右上のボタンからHTMLをダウンロードし、ブラウザで直接開いてお試しください。
+                        </p>
                     </div>
 
                     <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
@@ -677,16 +680,31 @@
             canvas = document.getElementById('canvasOutput');
             ctx = canvas.getContext('2d');
 
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false })
+            // Check API support
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("カメラの起動に失敗しました。\n・HTTPS接続であることを確認してください\n・ブラウザのカメラ権限を許可してください");
+                return;
+            }
+
+            // Simplified constraints for better mobile compatibility
+            const constraints = {
+                video: {
+                    facingMode: 'environment'
+                },
+                audio: false
+            };
+
+            navigator.mediaDevices.getUserMedia(constraints)
                 .then(function(s) {
                     stream = s;
                     video.srcObject = stream;
+                    video.setAttribute("playsinline", true); // iOS fix
                     video.play();
                     requestAnimationFrame(processVideo);
                 })
                 .catch(function(err) {
                     console.error("Camera Error: " + err);
-                    alert("カメラの起動に失敗しました。HTTPSまたはlocalhost環境で実行してください。");
+                    alert("カメラエラーが発生しました: " + err.name + "\n設定からカメラのアクセス許可を確認してください。");
                 });
         }
 
