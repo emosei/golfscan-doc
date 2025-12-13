@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GDL - Project Vision (Lifestyle)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script async src="https://docs.opencv.org/4.5.0/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', 'M PLUS Rounded 1c', sans-serif; background-color: #f0fdfa; color: #134e4a; }
+        
+        /* Soft Gradient & Shadows */
+        .bg-soft-gradient { background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%); }
+        .card-soft { 
+            background: white; 
+            border-radius: 24px; 
+            box-shadow: 0 10px 30px -10px rgba(20, 184, 166, 0.15); 
+            border: 2px solid white;
+            transition: all 0.3s ease;
+        }
+        .card-soft:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(20, 184, 166, 0.25); border-color: #5eead4; }
+
+        /* --- Animations (Same as index6) --- */
+        @keyframes scan-move { 0%, 100% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        .anim-scan-line { position: absolute; left: 0; width: 100%; height: 4px; background: #2dd4bf; box-shadow: 0 0 10px #2dd4bf; animation: scan-move 2s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+        @keyframes rectify-anim { 0% { transform: perspective(500px) rotateX(20deg) rotateY(-10deg) scale(0.9); opacity: 0.8; } 50% { transform: perspective(500px) rotateX(0deg) rotateY(0deg) scale(1); opacity: 1; box-shadow: 0 0 20px rgba(45, 212, 191, 0.5); } 100% { transform: perspective(500px) rotateX(20deg) rotateY(-10deg) scale(0.9); opacity: 0.8; } }
+        .anim-rectify-target { transform-style: preserve-3d; animation: rectify-anim 4s ease-in-out infinite; }
+        @keyframes pop-in { 0% { transform: scale(0); opacity: 0; } 80% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+        .anim-badge { animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; animation-delay: 1s; opacity: 0; }
+        @keyframes fly-mail { 0% { transform: translateX(0) translateY(0) scale(1); opacity: 1; } 100% { transform: translateX(100px) translateY(-50px) scale(0.5); opacity: 0; } }
+        .anim-fly { animation: fly-mail 2s infinite ease-in; }
+
+        /* Mobile Frame */
+        .mobile-mockup { border: 8px solid white; border-radius: 32px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(15, 118, 110, 0.3); background: #000; }
+        .hidden { display: none !important; }
+        .tab-btn.active { background-color: white; color: #0d9488; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .tab-btn { color: #134e4a; opacity: 0.7; }
+        
+        /* New Styles for Data Section */
+        .data-tag { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; margin: 2px; }
+        .tag-ocr { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+        .tag-meta { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        .tag-fut { background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <header class="bg-soft-gradient flex-none z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="bg-teal-600 text-white rounded-lg w-10 h-10 flex items-center justify-center font-black text-xl">G</div>
+                <h1 class="font-bold text-2xl text-teal-900 tracking-tight">Golf Data Link</h1>
+            </div>
+            
+            <div class="flex bg-white/40 p-1.5 rounded-full backdrop-blur-sm">
+                <button onclick="switchTab('vision')" id="tab-vision" class="tab-btn active px-6 py-2 text-sm font-bold transition-all rounded-full">
+                    Project Vision
+                </button>
+                <button onclick="switchTab('demo')" id="tab-demo" class="tab-btn px-6 py-2 text-sm font-bold transition-all rounded-full">
+                    Try Prototype
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 relative overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/snow.png')]">
+        
+        <!-- VISION TAB -->
+        <div id="view-vision" class="absolute inset-0 overflow-y-auto p-6 md:p-12 transition-opacity duration-300">
+            <div class="max-w-5xl mx-auto space-y-20 pb-32">
+                
+                <!-- Hero -->
+                <div class="text-center mt-8">
+                    <span class="bg-orange-100 text-orange-700 px-4 py-1.5 rounded-full text-xs font-bold uppercase mb-6 inline-block shadow-sm">
+                        New Ecosystem
+                    </span>
+                    <h2 class="text-4xl md:text-6xl font-black text-teal-900 mb-6 leading-tight">
+                        スコアカードを、<br>未来の資産へ。
+                    </h2>
+                    <p class="text-teal-700 text-lg font-medium leading-relaxed max-w-2xl mx-auto">
+                        アプリの枠を超えて、あなたのゴルフデータを自由に「流通」させる。<br>
+                        アナログとデジタルを繋ぐ、新しいハブ・プロジェクト。
+                    </p>
+                </div>
+
+                <!-- 1. UX Animations (Inherited from index6) -->
+                <div>
+                    <h3 class="text-center text-xl font-bold text-teal-800 mb-8">体験：紙からデータへ</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- Scan -->
+                        <div class="card-soft p-6 text-center group">
+                            <div class="h-40 bg-slate-100 rounded-xl mb-4 relative overflow-hidden flex items-center justify-center border border-slate-200">
+                                <div class="w-24 h-32 bg-white shadow-md border border-gray-200 transform rotate-3 flex flex-col p-2">
+                                    <div class="h-2 bg-gray-200 mb-2 w-full"></div>
+                                    <div class="grid grid-cols-4 gap-1 opacity-30"><div class="bg-gray-800 h-2"></div><div class="bg-gray-800 h-2"></div><div class="bg-gray-800 h-2"></div><div class="bg-gray-800 h-2"></div></div>
+                                </div>
+                                <div class="anim-scan-line"></div>
+                            </div>
+                            <h4 class="font-bold text-lg text-teal-900">1. Scan (撮影)</h4>
+                            <p class="text-sm text-slate-500 mt-2">カメラをかざすだけ。<br>歪みも影も、AIが自動補正。</p>
+                        </div>
+                        <!-- Rectify -->
+                        <div class="card-soft p-6 text-center group">
+                            <div class="h-40 bg-slate-100 rounded-xl mb-4 relative overflow-hidden flex items-center justify-center border border-slate-200 perspective-container">
+                                <div class="w-28 h-36 bg-white border-2 border-teal-400 shadow-xl p-2 anim-rectify-target flex flex-col">
+                                    <div class="flex justify-between items-center mb-2 border-b pb-1"><div class="w-8 h-2 bg-teal-200 rounded"></div><div class="w-4 h-2 bg-gray-200 rounded"></div></div>
+                                    <div class="grid grid-cols-3 gap-1 flex-1"><div class="bg-gray-50 border border-gray-100 rounded"></div><div class="bg-gray-50 border border-gray-100 rounded"></div><div class="bg-gray-50 border border-gray-100 rounded"></div><div class="bg-gray-50 border border-gray-100 rounded"></div><div class="bg-gray-50 border border-gray-100 rounded"></div><div class="bg-gray-50 border border-gray-100 rounded"></div></div>
+                                </div>
+                            </div>
+                            <h4 class="font-bold text-lg text-teal-900">2. Rectify (構造化)</h4>
+                            <p class="text-sm text-slate-500 mt-2">グニャグニャの画像を、<br>ピシッとした「データ」に変換。</p>
+                        </div>
+                        <!-- Asset -->
+                        <div class="card-soft p-6 text-center group">
+                            <div class="h-40 bg-slate-100 rounded-xl mb-4 relative overflow-hidden flex flex-col items-center justify-center border border-slate-200">
+                                <div class="text-4xl font-black text-slate-700">82</div>
+                                <div class="text-xs text-slate-400 font-bold tracking-widest uppercase mt-1">Total Score</div>
+                                <div class="absolute top-4 right-4 bg-teal-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-lg anim-badge flex items-center gap-1"><span>✓</span> Verified</div>
+                            </div>
+                            <h4 class="font-bold text-lg text-teal-900">3. Asset (資産化)</h4>
+                            <p class="text-sm text-slate-500 mt-2">公式記録として保存。<br>あらゆるアプリで活用可能。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Data Collection (NEW) -->
+                <div>
+                    <h3 class="text-center text-xl font-bold text-teal-800 mb-8">集めるデータ：あなたの全てを記録する</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <!-- Card Data -->
+                        <div class="card-soft p-8 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 p-4 opacity-10 text-8xl pointer-events-none">📝</div>
+                            <h4 class="text-lg font-bold text-teal-900 mb-4 flex items-center gap-2">
+                                <span class="bg-green-100 text-green-700 p-2 rounded-lg">📸</span>
+                                カードから読み取るもの
+                            </h4>
+                            <p class="text-xs text-slate-500 mb-4">高精度OCRが手書き文字を解析します。</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="data-tag tag-ocr">各ホールスコア</span>
+                                <span class="data-tag tag-ocr">パット数</span>
+                                <span class="data-tag tag-ocr">同伴者スコア</span>
+                                <span class="data-tag tag-ocr">同伴者パット</span>
+                                <span class="data-tag tag-ocr">ホール番号</span>
+                                <span class="data-tag tag-ocr">パー(Par)</span>
+                            </div>
+                        </div>
+
+                        <!-- Meta Data -->
+                        <div class="card-soft p-8 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 p-4 opacity-10 text-8xl pointer-events-none">🌤️</div>
+                            <h4 class="text-lg font-bold text-teal-900 mb-4 flex items-center gap-2">
+                                <span class="bg-blue-100 text-blue-700 p-2 rounded-lg">⚙️</span>
+                                自動・手動で補完するもの
+                            </h4>
+                            <p class="text-xs text-slate-500 mb-4">APIやGPSを使ってリッチな情報を付加します。</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="data-tag tag-meta">プレー日時</span>
+                                <span class="data-tag tag-meta">ゴルフ場名</span>
+                                <span class="data-tag tag-meta">コース(OUT/IN)</span>
+                                <span class="data-tag tag-meta">使用ティー</span>
+                                <span class="data-tag tag-meta">天気・気温・風</span>
+                                <span class="data-tag tag-meta">GPSログ</span>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-slate-100">
+                                <p class="text-[10px] text-purple-600 font-bold mb-2">Future R&D (拡張予定)</p>
+                                <div class="flex flex-wrap gap-2 opacity-70">
+                                    <span class="data-tag tag-fut">FWキープ率</span>
+                                    <span class="data-tag tag-fut">パーオン率</span>
+                                    <span class="data-tag tag-fut">番手別飛距離</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 3. Use Cases (NEW) -->
+                <div>
+                    <h3 class="text-center text-xl font-bold text-teal-800 mb-8">広がる活用シーン</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition">
+                            <div class="text-4xl mb-4">🏥</div>
+                            <h4 class="font-bold text-slate-800 text-base mb-2">ゴルファー保険</h4>
+                            <p class="text-xs text-slate-500 leading-5">
+                                プレー頻度や安定性（セーフティスコア）に基づいた、<strong class="text-teal-600">適正価格の保険プラン</strong>を提案。
+                            </p>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition">
+                            <div class="text-4xl mb-4">🏆</div>
+                            <h4 class="font-bold text-slate-800 text-base mb-2">リアルタイム大会</h4>
+                            <p class="text-xs text-slate-500 leading-5">
+                                違うアプリを使っていても大丈夫。GDLがデータを束ねて<strong class="text-teal-600">共通リーダーボード</strong>を生成。
+                            </p>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition">
+                            <div class="text-4xl mb-4">🧠</div>
+                            <h4 class="font-bold text-slate-800 text-base mb-2">AIコーチング</h4>
+                            <p class="text-xs text-slate-500 leading-5">
+                                「雨の日はパットが増える」など、<strong class="text-teal-600">あなただけの癖</strong>をビッグデータから発見。
+                            </p>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition">
+                            <div class="text-4xl mb-4">🎁</div>
+                            <h4 class="font-bold text-slate-800 text-base mb-2">ギア提案</h4>
+                            <p class="text-xs text-slate-500 leading-5">
+                                スコアの傾向から、あなたの弱点を補う<strong class="text-teal-600">最適なクラブやボール</strong>をリコメンド。
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 4. Roadmap (Detailed) -->
+                <div>
+                    <h3 class="text-center text-xl font-bold text-teal-800 mb-8">実現へのステップ</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="card-soft p-6 border-l-8 border-l-teal-500">
+                            <div class="flex justify-between items-center mb-4"><span class="bg-teal-100 text-teal-800 px-3 py-1 rounded-full text-xs font-bold">STEP 1</span><span class="text-xs text-teal-600 font-bold">検証完了</span></div>
+                            <h4 class="text-lg font-bold text-slate-800 mb-2">画像取得・前処理</h4>
+                            <p class="text-xs text-slate-500 mb-2">OCRの前段階として、ノイズのない綺麗な画像を生成。</p>
+                            <div class="bg-slate-50 p-2 rounded text-[10px] text-slate-500 border border-slate-100">課題: 逆光・影の除去精度</div>
+                        </div>
+                        <div class="card-soft p-6 border-l-8 border-l-slate-300">
+                            <div class="flex justify-between items-center mb-4"><span class="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-xs font-bold">STEP 2</span></div>
+                            <h4 class="text-lg font-bold text-slate-800 mb-2">レイアウト解析</h4>
+                            <p class="text-xs text-slate-500 mb-2">ゴルフ場ごとに異なる表構造を理解する。</p>
+                            <div class="bg-slate-50 p-2 rounded text-[10px] text-slate-500 border border-slate-100">課題: 縦書き・横書きの自動判別</div>
+                        </div>
+                        <div class="card-soft p-6 border-l-8 border-l-slate-300">
+                            <div class="flex justify-between items-center mb-4"><span class="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-xs font-bold">STEP 3</span></div>
+                            <h4 class="text-lg font-bold text-slate-800 mb-2">OCR & データ化</h4>
+                            <p class="text-xs text-slate-500 mb-2">手書き文字を読み取り、デジタル化。</p>
+                            <div class="bg-slate-50 p-2 rounded text-[10px] text-slate-500 border border-slate-100">課題: 癖字（1と7など）の誤読防止</div>
+                        </div>
+                        <div class="card-soft p-6 border-l-8 border-l-slate-300">
+                            <div class="flex justify-between items-center mb-4"><span class="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-xs font-bold">STEP 4</span></div>
+                            <h4 class="text-lg font-bold text-slate-800 mb-2">データ標準化</h4>
+                            <p class="text-xs text-slate-500 mb-2">共通言語「GolfScoreXML」の策定。</p>
+                            <div class="bg-slate-50 p-2 rounded text-[10px] text-slate-500 border border-slate-100">課題: 他社アプリとの互換性設計</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Future Hub -->
+                <div class="bg-teal-900 rounded-3xl p-10 text-white text-center">
+                    <h3 class="text-xl font-bold mb-4">未来：分散型データハブ</h3>
+                    <p class="text-sm opacity-90 mb-8 max-w-2xl mx-auto">
+                        GDL Coreは、データを一箇所に集めるのではなく、<br>
+                        認証（鍵）と翻訳（標準化）を提供して、世界中のサービスを繋ぎます。
+                    </p>
+                    <div class="inline-flex flex-col md:flex-row items-center gap-4 text-xs font-bold bg-white/10 p-6 rounded-2xl backdrop-blur-sm">
+                        <div class="bg-white/20 px-4 py-2 rounded">他社アプリ</div>
+                        <div class="text-teal-300 text-lg">↔</div>
+                        <div class="bg-white text-teal-900 px-6 py-3 rounded-full shadow-lg">GDL CORE (API GW)</div>
+                        <div class="text-teal-300 text-lg">↔</div>
+                        <div class="bg-white/20 px-4 py-2 rounded">提携パートナー</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- DEMO TAB (Stable OpenCV) -->
+        <div id="view-demo" class="absolute inset-0 bg-slate-900/95 flex flex-col items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+            <!-- (Same Demo Logic as index6) -->
+            <div class="flex flex-col lg:flex-row items-center gap-12 max-w-6xl w-full h-full justify-center overflow-y-auto">
+                <div class="w-full lg:w-1/3 space-y-6 order-2 lg:order-1">
+                    <div>
+                        <span class="text-emerald-500 font-bold tracking-wider text-xs">PROTOTYPE</span>
+                        <h2 class="text-3xl font-bold text-white mt-2">Magic Scanner</h2>
+                        <p class="text-slate-400 mt-2 text-sm">Web技術(OpenCV)で再現した画像処理エンジンです。カメラ映像が一瞬で解析用画像に変換されます。</p>
+                        <p class="text-xs text-amber-400 mt-2 bg-amber-900/30 p-2 rounded">※カメラが起動しない場合は、HTMLをDLしてローカルで実行してください。</p>
+                    </div>
+                    <div class="bg-slate-900 rounded-xl p-4 border border-slate-800">
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="applyFilter('original')" class="filter-btn active bg-slate-800 hover:bg-slate-700 text-xs text-white py-3 rounded-lg border border-transparent transition-all group-original">Original</button>
+                            <button onclick="applyFilter('gray')" class="filter-btn bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 py-3 rounded-lg border border-transparent transition-all group-gray">Gray</button>
+                            <button onclick="applyFilter('binary')" class="filter-btn bg-slate-800 hover:bg-slate-700 text-xs text-emerald-400 font-bold py-3 rounded-lg border border-emerald-900/50 transition-all group-binary">Binary</button>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-emerald-900/10 border border-emerald-900/30 rounded-lg">
+                        <div class="flex justify-between text-xs"><span class="text-slate-400">FPS:</span><span class="text-white font-mono" id="fps-meter">0.0</span></div>
+                        <div class="flex justify-between text-xs mt-1"><span class="text-slate-400">Latency:</span><span class="text-white font-mono" id="proc-time">0ms</span></div>
+                    </div>
+                </div>
+                <div class="relative order-1 lg:order-2">
+                    <div class="mobile-mockup w-[320px] h-[580px] bg-black relative">
+                        <div id="camera-loading" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-10"><div class="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div><p class="text-xs text-slate-500">Initializing...</p></div>
+                        <video id="videoInput" class="absolute opacity-0 pointer-events-none z-[-1]" playsinline webkit-playsinline></video>
+                        <canvas id="canvasOutput" class="absolute inset-0 w-full h-full object-cover"></canvas>
+                        <div id="start-overlay" class="absolute inset-0 bg-slate-900/90 flex flex-col items-center justify-center z-30"><button onclick="startCameraDemo()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-8 rounded-full text-sm shadow-lg">Start Demo</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- JS Logic (Same as before) -->
+    <script>
+        function switchTab(tabId) {
+            const visionView = document.getElementById('view-vision');
+            const demoView = document.getElementById('view-demo');
+            const visionBtn = document.getElementById('tab-vision');
+            const demoBtn = document.getElementById('tab-demo');
+            if (tabId === 'vision') {
+                visionView.classList.remove('opacity-0', 'pointer-events-none');
+                demoView.classList.add('opacity-0', 'pointer-events-none');
+                visionBtn.classList.add('active');
+                demoBtn.classList.remove('active');
+                stopCamera();
+            } else {
+                visionView.classList.add('opacity-0', 'pointer-events-none');
+                demoView.classList.remove('opacity-0', 'pointer-events-none');
+                visionBtn.classList.remove('active');
+                demoBtn.classList.add('active');
+            }
+        }
+        let video, canvas, ctx, streaming=false, stream=null, srcMat, dstMat, currentFilter='original', cap, lastTime=Date.now(), frameCount=0;
+        function onOpenCvReady() { document.getElementById('camera-loading').classList.add('hidden'); }
+        function startCameraDemo() {
+            document.getElementById('start-overlay').classList.add('hidden');
+            video = document.getElementById('videoInput'); canvas = document.getElementById('canvasOutput'); ctx = canvas.getContext('2d');
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { alert("Camera API Error"); return; }
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false }).then(s => {
+                stream = s; video.srcObject = stream; video.setAttribute("playsinline", true);
+                video.onloadedmetadata = () => { video.play(); requestAnimationFrame(processVideo); };
+            }).catch(e => alert("Camera Error: " + e.name));
+        }
+        function stopCamera() {
+            if (stream) stream.getTracks().forEach(track => track.stop());
+            stream = null; streaming = false;
+            if (srcMat) { srcMat.delete(); srcMat = null; } if (dstMat) { dstMat.delete(); dstMat = null; } cap = null;
+        }
+        function processVideo() {
+            if (!stream) return;
+            if (video.readyState !== 4 || video.videoWidth === 0) { requestAnimationFrame(processVideo); return; }
+            if (!streaming || video.videoWidth !== srcMat?.cols || video.videoHeight !== srcMat?.rows) {
+                try {
+                    video.width = video.videoWidth; video.height = video.videoHeight;
+                    if (srcMat) srcMat.delete(); if (dstMat) dstMat.delete();
+                    srcMat = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+                    dstMat = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+                    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                    cap = new cv.VideoCapture(video); streaming = true;
+                } catch (e) { requestAnimationFrame(processVideo); return; }
+            }
+            try {
+                const now = Date.now(), dt = now - lastTime; frameCount++;
+                if (dt >= 1000) { document.getElementById('fps-meter').innerText = frameCount.toFixed(1); frameCount = 0; lastTime = now; }
+                const t0 = performance.now(); cap.read(srcMat);
+                if (currentFilter === 'gray') { cv.cvtColor(srcMat, dstMat, cv.COLOR_RGBA2GRAY, 0); cv.imshow('canvasOutput', dstMat); }
+                else if (currentFilter === 'binary') { cv.cvtColor(srcMat, dstMat, cv.COLOR_RGBA2GRAY, 0); cv.adaptiveThreshold(dstMat, dstMat, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2); cv.imshow('canvasOutput', dstMat); }
+                else { cv.imshow('canvasOutput', srcMat); }
+                document.getElementById('proc-time').innerText = (performance.now() - t0).toFixed(1) + 'ms';
+                requestAnimationFrame(processVideo);
+            } catch (e) { console.error(e); }
+        }
+        window.applyFilter = (t) => {
+            currentFilter = t;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'border-emerald-500'));
+            if(t==='binary') document.querySelector('.group-binary')?.classList.add('active', 'border-emerald-500');
+        };
+    </script>
+</body>
+</html>
