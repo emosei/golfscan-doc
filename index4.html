@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GDL Technical Infographic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script async src="https://docs.opencv.org/4.5.0/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: #0f172a; color: #f8fafc; overflow-x: hidden; }
+        
+        /* Infographic Styles (Dark Theme) */
+        .info-section { position: relative; padding: 6rem 1rem; max-width: 1000px; margin: 0 auto; }
+        .info-card { 
+            background: rgba(30, 41, 59, 0.7); 
+            border: 1px solid rgba(51, 65, 85, 0.5); 
+            border-radius: 1.5rem; 
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, border-color 0.3s; 
+        }
+        .info-card:hover { transform: translateY(-5px); border-color: #10b981; }
+        
+        /* Connector Lines */
+        .connector-v { width: 2px; height: 100px; background: linear-gradient(to bottom, #334155, #10b981, #334155); margin: 0 auto; position: relative; }
+        .connector-v::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; }
+        
+        /* Typography & Gradients */
+        .text-gradient { background: linear-gradient(135deg, #34d399 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .bg-gradient-dark { background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%); }
+        
+        /* Animations */
+        @keyframes scan-move { 0%, 100% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        .anim-scan-line { position: absolute; left: 0; width: 100%; height: 2px; background: #10b981; box-shadow: 0 0 8px #10b981; animation: scan-move 2s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+
+        @keyframes flow-right { 0% { left: 0; opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { left: 100%; opacity: 0; } }
+        .data-packet { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #fff; top: 50%; transform: translateY(-50%); opacity: 0; box-shadow: 0 0 5px white; }
+        .flow-anim-1 { animation: flow-right 2s infinite linear; }
+        .flow-anim-2 { animation: flow-right 2s infinite linear 0.6s; }
+        .flow-anim-3 { animation: flow-right 2s infinite linear 1.2s; }
+
+        /* Scroll Reveal */
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* Tech Badges */
+        .tech-badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; letter-spacing: 0.05em; display: inline-block; }
+        .badge-int { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+        .badge-share { background: #172554; color: #60a5fa; border: 1px solid #1e40af; }
+        .badge-auto { background: #14532d; color: #4ade80; border: 1px solid #166534; }
+        .badge-struct { background: #312e81; color: #818cf8; border: 1px solid #4338ca; }
+
+        /* Data Grid */
+        .data-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border-bottom: 1px solid rgba(51, 65, 85, 0.5); transition: background 0.2s; }
+        .data-row:last-child { border-bottom: none; }
+        .data-row:hover { background: rgba(16, 185, 129, 0.05); }
+
+        /* Demo UI */
+        .mobile-frame { border: 2px solid #334155; border-radius: 36px; overflow: hidden; background: #000; box-shadow: 0 0 50px rgba(16, 185, 129, 0.1); }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="bg-gradient-dark">
+
+    <!-- 1. HERO SECTION -->
+    <section class="min-h-screen flex flex-col items-center justify-center text-center p-6 relative overflow-hidden">
+        <!-- Background Tech Mesh -->
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 -z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f172a]/80 to-[#0f172a] -z-10"></div>
+        
+        <div class="reveal active space-y-8">
+            <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full border border-emerald-500/30 bg-emerald-900/10 text-emerald-400 text-xs font-mono tracking-widest">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> SYSTEM VERIFIED
+            </div>
+            <h1 class="text-5xl md:text-7xl font-black text-white leading-tight tracking-tight">
+                Golf Data <br><span class="text-gradient">Link Protocol</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto font-light leading-relaxed">
+                アナログなスコアカードを<span class="text-emerald-400 font-bold">構造化データ</span>へ変換。<br>
+                API連携で拡張する、次世代の分散型ゴルフデータ基盤。
+            </p>
+        </div>
+
+        <div class="mt-20 reveal active delay-200">
+            <div class="text-slate-600 text-xs font-mono mb-2">SCROLL TO INITIALIZE</div>
+            <div class="w-px h-16 bg-gradient-to-b from-emerald-500 to-transparent mx-auto"></div>
+        </div>
+    </section>
+
+    <!-- 2. CORE ARCHITECTURE -->
+    <section class="info-section">
+        <h2 class="text-center text-3xl font-bold text-white mb-12 reveal">Core Architecture</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- Step 1 -->
+            <div class="info-card p-8 reveal group">
+                <div class="flex justify-between items-start mb-6">
+                    <span class="text-emerald-500 font-mono text-4xl font-bold">01</span>
+                    <span class="bg-emerald-900/30 text-emerald-400 text-[10px] px-2 py-1 rounded border border-emerald-500/30">EDGE AI</span>
+                </div>
+                <div class="h-32 bg-slate-900 rounded-lg mb-6 relative overflow-hidden flex items-center justify-center border border-slate-700 group-hover:border-emerald-500/50 transition-colors">
+                    <div class="w-20 h-24 bg-slate-800 border border-slate-600 transform rotate-3 flex flex-col p-2 opacity-80">
+                        <div class="h-1 bg-slate-600 mb-2 w-full"></div>
+                        <div class="grid grid-cols-4 gap-1"><div class="bg-slate-700 h-1"></div><div class="bg-slate-700 h-1"></div><div class="bg-slate-700 h-1"></div><div class="bg-slate-700 h-1"></div></div>
+                    </div>
+                    <div class="anim-scan-line"></div>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Scan & Pre-process</h3>
+                <p class="text-sm text-slate-400 leading-relaxed">
+                    オンデバイスMLによるリアルタイム補正。逆光・影・手ブレを除去し、OCRに最適な二値化画像を生成。
+                </p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="info-card p-8 reveal delay-100 group">
+                <div class="flex justify-between items-start mb-6">
+                    <span class="text-blue-500 font-mono text-4xl font-bold">02</span>
+                    <span class="bg-blue-900/30 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/30">LOGIC</span>
+                </div>
+                <div class="h-32 bg-slate-900 rounded-lg mb-6 relative overflow-hidden flex items-center justify-center border border-slate-700 group-hover:border-blue-500/50 transition-colors">
+                    <div class="w-24 h-28 border border-blue-500/50 grid grid-cols-3 gap-px bg-blue-500/10">
+                        <div class="bg-slate-800/50"></div><div class="bg-slate-800/50"></div><div class="bg-slate-800/50"></div>
+                        <div class="bg-slate-800/50"></div><div class="bg-slate-800/50"></div><div class="bg-slate-800/50"></div>
+                        <div class="bg-slate-800/50"></div><div class="bg-slate-800/50"></div><div class="bg-slate-800/50"></div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Layout Analysis</h3>
+                <p class="text-sm text-slate-400 leading-relaxed">
+                    罫線検出アルゴリズムにより、ゴルフ場ごとに異なる複雑なグリッド構造を解析。セル単位でデータを特定。
+                </p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="info-card p-8 reveal delay-200 group">
+                <div class="flex justify-between items-start mb-6">
+                    <span class="text-purple-500 font-mono text-4xl font-bold">03</span>
+                    <span class="bg-purple-900/30 text-purple-400 text-[10px] px-2 py-1 rounded border border-purple-500/30">SCHEMA</span>
+                </div>
+                <div class="h-32 bg-slate-900 rounded-lg mb-6 relative overflow-hidden flex flex-col items-center justify-center border border-slate-700 group-hover:border-purple-500/50 transition-colors">
+                    <div class="font-mono text-xs text-purple-400 mb-1">&lt;Score&gt;</div>
+                    <div class="text-4xl font-black text-white">72</div>
+                    <div class="font-mono text-xs text-purple-400 mt-1">&lt;/Score&gt;</div>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Standardization</h3>
+                <p class="text-sm text-slate-400 leading-relaxed">
+                    認識データを共通規格「GolfScoreXML」へ変換。メタデータ（日時・場所）を付与し永続化。
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="connector-v"></div>
+
+    <!-- 3. DATA TAXONOMY (Detailed) -->
+    <section class="info-section">
+        <h2 class="text-center text-3xl font-bold text-white mb-10 reveal">Data Taxonomy</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 reveal">
+            
+            <!-- Card Data -->
+            <div class="info-card p-8 border-t-4 border-t-emerald-500">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-white">OCR Data</h3>
+                    <span class="text-xs text-slate-400 font-mono">SOURCE: PAPER</span>
+                </div>
+                <div class="flex flex-col">
+                    <div class="data-row">
+                        <span class="text-sm text-slate-300">スコア (Gross/Net)</span>
+                        <span class="tech-badge badge-int">INT</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="text-sm text-slate-300">パット数</span>
+                        <span class="tech-badge badge-int">INT</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="text-sm text-slate-300">ホール番号 / Par</span>
+                        <span class="tech-badge badge-struct">STRUCT</span>
+                    </div>
+                    <div class="data-row border-l-2 border-blue-500 pl-2 bg-blue-900/10">
+                        <span class="text-sm text-white">同伴者スコア</span>
+                        <span class="tech-badge badge-share">SHARE</span>
+                    </div>
+                    <div class="data-row border-l-2 border-blue-500 pl-2 bg-blue-900/10">
+                        <span class="text-sm text-white">同伴者パット</span>
+                        <span class="tech-badge badge-share">SHARE</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meta Data -->
+            <div class="info-card p-8 border-t-4 border-t-blue-500">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-white">Meta Data</h3>
+                    <span class="text-xs text-slate-400 font-mono">SOURCE: API/GPS</span>
+                </div>
+                <div class="flex flex-col">
+                    <div class="data-row">
+                        <span class="text-sm text-slate-300">プレー日時</span>
+                        <span class="tech-badge badge-int">DATETIME</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="text-sm text-slate-300">ゴルフ場・コース名</span>
+                        <span class="tech-badge badge-struct">MASTER</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="text-sm text-slate-300">使用ティー</span>
+                        <span class="tech-badge badge-struct">ENUM</span>
+                    </div>
+                    <div class="data-row border-l-2 border-emerald-500 pl-2 bg-emerald-900/10">
+                        <span class="text-sm text-white">天候・気温・風</span>
+                        <span class="tech-badge badge-auto">AUTO</span>
+                    </div>
+                    <div class="data-row border-l-2 border-emerald-500 pl-2 bg-emerald-900/10">
+                        <span class="text-sm text-white">GPS位置ログ</span>
+                        <span class="tech-badge badge-auto">AUTO</span>
+                    </div>
+                </div>
+                
+                <!-- Future -->
+                <div class="mt-6 pt-4 border-t border-slate-700/50">
+                    <div class="text-[10px] text-purple-400 font-bold uppercase mb-2">Future Analytics (R&D)</div>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-slate-800 rounded text-[10px] text-slate-400 border border-slate-700">FWキープ率</span>
+                        <span class="px-2 py-1 bg-slate-800 rounded text-[10px] text-slate-400 border border-slate-700">GIR (パーオン率)</span>
+                        <span class="px-2 py-1 bg-slate-800 rounded text-[10px] text-slate-400 border border-slate-700">番手別飛距離</span>
+                        <span class="px-2 py-1 bg-slate-800 rounded text-[10px] text-slate-400 border border-slate-700">メンタル推移</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="connector-v"></div>
+
+    <!-- 4. ECOSYSTEM (HUB VISUALIZATION) -->
+    <section class="info-section">
+        <h2 class="text-center text-3xl font-bold text-white mb-4 reveal">Decentralized Data Hub</h2>
+        <p class="text-center text-slate-400 mb-12 max-w-2xl mx-auto text-sm reveal">
+            GDL Coreは、API Gatewayと認証基盤（OAuth 2.0）を提供。<br>
+            異種システム間のデータ流通を標準化し、新たなビジネス価値を創出します。
+        </p>
+
+        <div class="reveal relative bg-slate-900 border border-slate-800 rounded-[2rem] p-10 overflow-hidden shadow-2xl">
+            <!-- BG Grid -->
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] opacity-5"></div>
+            
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                
+                <!-- Left: Input Sources -->
+                <div class="flex flex-col gap-4 w-full md:w-1/4">
+                    <div class="bg-slate-800 border border-slate-700 p-3 rounded-lg flex items-center justify-between relative overflow-hidden">
+                        <div class="flex items-center gap-3"><span class="text-xl">📱</span> <span class="text-xs font-bold text-slate-300">App A</span></div>
+                        <span class="text-[9px] font-mono text-slate-500">JSON</span>
+                        <div class="data-packet flow-anim-1"></div>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 p-3 rounded-lg flex items-center justify-between relative overflow-hidden">
+                        <div class="flex items-center gap-3"><span class="text-xl">⛳</span> <span class="text-xs font-bold text-slate-300">DB System</span></div>
+                        <span class="text-[9px] font-mono text-slate-500">SQL</span>
+                        <div class="data-packet flow-anim-2"></div>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 p-3 rounded-lg flex items-center justify-between relative overflow-hidden">
+                        <div class="flex items-center gap-3"><span class="text-xl">📄</span> <span class="text-xs font-bold text-slate-300">Paper</span></div>
+                        <span class="text-[9px] font-mono text-slate-500">IMG</span>
+                        <div class="data-packet flow-anim-3"></div>
+                    </div>
+                </div>
+
+                <!-- Center: Hub -->
+                <div class="flex-none relative w-48 h-48 flex items-center justify-center">
+                    <div class="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl animate-pulse"></div>
+                    <div class="relative w-40 h-40 bg-slate-950 border-2 border-emerald-500 rounded-full flex flex-col items-center justify-center z-10 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                        <div class="text-2xl font-black text-white tracking-tighter">GDL</div>
+                        <div class="text-[10px] text-emerald-400 font-bold tracking-widest mt-1">CORE HUB</div>
+                        <div class="mt-2 text-[8px] text-slate-500 border-t border-slate-800 pt-1">API Gateway</div>
+                    </div>
+                </div>
+
+                <!-- Right: Use Cases -->
+                <div class="grid grid-cols-1 gap-4 w-full md:w-1/3">
+                    <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700 hover:border-emerald-500/50 transition cursor-default">
+                        <div class="flex items-center gap-3 mb-1">
+                            <span class="text-xl">🏥</span>
+                            <h4 class="text-sm font-bold text-white">保険連携 (Insurance)</h4>
+                        </div>
+                        <p class="text-[10px] text-slate-400">プレー頻度やスコア安定性に基づく、動的な保険料率の算定。</p>
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700 hover:border-blue-500/50 transition cursor-default">
+                        <div class="flex items-center gap-3 mb-1">
+                            <span class="text-xl">🏆</span>
+                            <h4 class="text-sm font-bold text-white">大会連携 (Tournament)</h4>
+                        </div>
+                        <p class="text-[10px] text-slate-400">異種アプリ間でのリアルタイム・リーダーボード生成。</p>
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700 hover:border-purple-500/50 transition cursor-default">
+                        <div class="flex items-center gap-3 mb-1">
+                            <span class="text-xl">🤖</span>
+                            <h4 class="text-sm font-bold text-white">AIコーチ (Analysis)</h4>
+                        </div>
+                        <p class="text-[10px] text-slate-400">天候×コース相性分析による、パーソナライズされた戦略提案。</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. PROTOTYPE DEMO -->
+    <section id="demo-section" class="py-20 mt-20 border-t border-slate-800 bg-slate-900/30">
+        <div class="max-w-5xl mx-auto px-6 text-center">
+            <div class="inline-block px-3 py-1 rounded bg-slate-800 border border-slate-700 text-slate-400 text-xs font-mono mb-4">TECHNOLOGY PROOF</div>
+            <h2 class="text-3xl font-bold text-white mb-10">Prototype Demo</h2>
+
+            <div class="info-card p-4 md:p-10 flex flex-col md:flex-row items-center gap-12 justify-center">
+                
+                <!-- Controls -->
+                <div class="w-full md:w-1/3 text-left space-y-4">
+                    <div class="text-xs text-slate-400 mb-2 font-mono">SELECT FILTER:</div>
+                    <button onclick="applyFilter('original')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 px-4 rounded-lg text-sm text-left border border-slate-700 transition flex justify-between">
+                        <span>Original Feed</span>
+                        <span class="text-slate-500 text-xs">RGB</span>
+                    </button>
+                    <button onclick="applyFilter('binary')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-lg text-sm text-left shadow-lg shadow-emerald-900/50 transition flex justify-between">
+                        <span>Binary Process</span>
+                        <span class="text-emerald-200 text-xs">OCR Mode</span>
+                    </button>
+                    <div class="pt-4 border-t border-slate-700/50 text-right">
+                        <span class="text-xs text-slate-500 font-mono">Latency: <span id="proc-time" class="text-emerald-400">0ms</span></span>
+                    </div>
+                </div>
+
+                <!-- Device -->
+                <div class="relative">
+                    <div class="mobile-frame w-[300px] h-[550px] relative">
+                        <div id="camera-loading" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 text-xs font-bold bg-slate-900 z-10 font-mono">INITIALIZING SYSTEM...</div>
+                        <video id="videoInput" class="absolute opacity-0 pointer-events-none z-[-1]" playsinline webkit-playsinline></video>
+                        <canvas id="canvasOutput" class="absolute inset-0 w-full h-full object-cover"></canvas>
+                        
+                        <!-- Overlay -->
+                        <div class="absolute inset-0 z-20 pointer-events-none p-4 flex flex-col justify-between">
+                            <div class="flex justify-between items-center">
+                                <span class="bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm border border-white/10 font-mono">LIVE FEED</span>
+                                <div class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_red]"></div>
+                            </div>
+                            <div class="border border-emerald-500/30 rounded-lg flex-1 my-4 relative">
+                                <div class="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-emerald-500"></div>
+                                <div class="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-emerald-500"></div>
+                                <div class="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-emerald-500"></div>
+                                <div class="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-emerald-500"></div>
+                            </div>
+                            <div class="h-12 flex justify-center pointer-events-auto">
+                                <button onclick="startCameraDemo()" class="bg-white text-slate-900 font-bold px-8 rounded-full text-xs shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 transition">ACTIVATE</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-slate-900 text-slate-600 py-12 text-center text-xs font-mono border-t border-slate-800">
+        <p>GDL PROJECT // CONFIDENTIAL</p>
+    </footer>
+
+    <!-- Logic -->
+    <script>
+        // Scroll Reveal
+        window.addEventListener('scroll', () => {
+            document.querySelectorAll('.reveal').forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight * 0.85) el.classList.add('active');
+            });
+        });
+
+        // OpenCV Logic
+        let video, canvas, ctx, streaming=false, stream=null, srcMat, dstMat, currentFilter='original', cap, lastTime=Date.now(), frameCount=0;
+        function onOpenCvReady() { document.getElementById('camera-loading').innerText = "SYSTEM READY"; }
+        
+        function startCameraDemo() {
+            video = document.getElementById('videoInput'); canvas = document.getElementById('canvasOutput'); ctx = canvas.getContext('2d');
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { alert("Camera API Error"); return; }
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false }).then(s => {
+                stream = s; video.srcObject = stream; video.setAttribute("playsinline", true);
+                video.onloadedmetadata = () => { video.play(); requestAnimationFrame(processVideo); };
+                document.getElementById('camera-loading').classList.add('hidden');
+            }).catch(e => alert("Camera Access Denied"));
+        }
+
+        function processVideo() {
+            if (!stream) return;
+            if (video.readyState !== 4 || video.videoWidth === 0) { requestAnimationFrame(processVideo); return; }
+            if (!streaming || video.videoWidth !== srcMat?.cols || video.videoHeight !== srcMat?.rows) {
+                try {
+                    video.width = video.videoWidth; video.height = video.videoHeight;
+                    if (srcMat) srcMat.delete(); if (dstMat) dstMat.delete();
+                    srcMat = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+                    dstMat = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+                    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                    cap = new cv.VideoCapture(video); streaming = true;
+                } catch (e) { requestAnimationFrame(processVideo); return; }
+            }
+            try {
+                const t0 = performance.now();
+                cap.read(srcMat);
+                if (currentFilter === 'binary') { cv.cvtColor(srcMat, dstMat, cv.COLOR_RGBA2GRAY, 0); cv.adaptiveThreshold(dstMat, dstMat, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2); cv.imshow('canvasOutput', dstMat); }
+                else { cv.imshow('canvasOutput', srcMat); }
+                document.getElementById('proc-time').innerText = (performance.now() - t0).toFixed(1) + 'ms';
+                requestAnimationFrame(processVideo);
+            } catch (e) {}
+        }
+        window.applyFilter = (t) => currentFilter = t;
+    </script>
+</body>
+</html>
